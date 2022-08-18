@@ -1,0 +1,32 @@
+name: 'Setup Jakt Environment'
+description: 'Setup a Jakt environment and add the compiler to the PATH'
+author: 'SerenityOS'
+inputs:
+  revision:
+    description: 'The revision of Jakt to pull, defaults to latest on main'
+    default: 'main'
+    required: false
+  token:
+    description: 'Token used to pull from the Jake repository'
+    default: ${{ github.token }}
+    required: false
+  cache:
+    description: "Enable cache, subsequent runs will be faster unless a new revision is downloaded"
+    default: false
+    required: false
+outputs:
+  jakt-hash:
+    description: 'Hash of the checked-out revision'
+  jakt-path:
+    description: 'Path to built jakt binary'
+  cache-hit:
+    description: 'Indicates whether the cache was hit'
+runs:
+  using: 'composite'
+  steps:
+    - uses: aminya/setup-cpp@v1
+      with:
+        llvm: 14.0.0
+        cmake: true
+        ninja: true
+  main: 'lib/jakt/main.js'

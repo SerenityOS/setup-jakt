@@ -1,0 +1,30 @@
+{
+  "name": "setup-jakt",
+  "version": "0.0.1",
+  "description": "GitHub action to setup Jakt",
+  "main": "lib/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alimpfard/setup-jakt.git"
+  },
+  "keywords": [
+    "actions",
+    "jakt",
+    "setup"
+  ],
+  "author": "SerenityOS",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/alimpfard/setup-jakt/issues"
+  },
+  "homepage": "https://github.com/alimpfard/setup-jakt#readme",
+  "dependencies": {
+    "@actions/core": "1.9.1",
+    "@actions/github": "5.0.3",
+    "@actions/io": "1.1.2",
+    "@actions/tool-cache": "2.0.1"
+  }
+}
