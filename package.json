@@ -25,6 +25,10 @@
     "@actions/core": "1.9.1",
     "@actions/github": "5.0.3",
     "@actions/io": "1.1.2",
-    "@actions/tool-cache": "2.0.1"
+    "@actions/tool-cache": "2.0.1",
+    "glob": "^8.0.3"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0"
   }
 }

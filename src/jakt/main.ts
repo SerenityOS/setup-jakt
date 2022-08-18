@@ -7,6 +7,7 @@ import path from "path";
 import child_process from "child_process";
 import process from "process";
 import os from "os";
+import glob from "glob";
 
 async function run() {
     let revision = core.getInput("revision");
@@ -31,20 +32,22 @@ async function run() {
                 console.log();
                 throw new Error("jakt not found");
             }
-            core.exportVariable("cache-hit", true);
             core.debug(`Found cached version of jakt at ${jaktPath}`);
             core.endGroup();
+
+            core.setOutput("cache_hit", true);
         } catch {
             core.info(`Cache entry for ${revision} not found. Downloading...`);
         }
     }
 
     if (jaktPath == undefined) {
-        core.exportVariable("cache-hit", false);
         let downloadedPath = await tc.downloadTool(
             `https://github.com/SerenityOS/jakt/archive/${revision}.zip`
         );
         core.endGroup();
+
+        core.setOutput("cache_hit", false);
 
         core.startGroup(`Building jakt#${revision}`);
         core.info(`Extracting jakt`);
@@ -56,6 +59,22 @@ async function run() {
 
         jaktPath = path.join(extractedPath, "jakt");
         await io.mkdirP(jaktPath);
+
+        if (process.env["JAKT_ACTION_CACHE_HIT"] == "true") {
+            core.info(`Setting up toolchain paths`);
+            let cmakeBinPath = await new Promise<string>((res, rej) =>
+                glob(`${process.env["JAKT_ACTION_CACHE_PATH"]}/*/bin`, (err, matches) => {
+                    if (err) return rej(err);
+                    res(matches[0]);
+                })
+            );
+
+            for (const p of ["llvm/bin", "ninja"]) {
+                core.addPath(path.join(process.env["JAKT_ACTION_CACHE_PATH"]!, p));
+            }
+
+            core.addPath(cmakeBinPath);
+        }
 
         await runCommand(
             buildPath,
@@ -70,25 +89,31 @@ async function run() {
         await runCommand(buildPath, "cmake", "--install", ".");
     }
 
-    core.setOutput("jakt-path", jaktPath);
     core.endGroup();
+
+    core.setOutput("jakt-path", jaktPath);
 
     if (shouldCache) {
         core.startGroup(`Caching jakt#${revision}`);
-        tc.cacheDir(jaktPath, "jakt", revision);
+        let cachedPath = await tc.cacheDir(jaktPath, "jakt", revision);
+        core.info(`Cached jakt at ${cachedPath}`);
         core.endGroup();
     }
 
-    core.startGroup("Preparing jakt");
     core.addPath(path.join(jaktPath, "bin"));
     core.exportVariable("CMAKE_PREFIX_PATH", cmakePrefixPath(jaktPath));
-    core.endGroup();
+    core.exportVariable("JAKT_COMPILER", path.join(jaktPath, "bin/jakt"));
+    core.exportVariable("JAKT_RUNTIME", path.join(jaktPath, "include/runtime"));
 }
 
 function cmakePrefixPath(jaktPath: string): string {
     let appendedPath = core.toPlatformPath(jaktPath);
+    let existingPath = process.env["CMAKE_PREFIX_PATH"];
+    if (existingPath == undefined)
+        return appendedPath;
+
     let separator = os.platform() == "win32" ? ";" : ":";
-    return `${appendedPath}${separator}${process.env["CMAKE_PREFIX_PATH"]}`;
+    return `${appendedPath}${separator}${existingPath}`;
 }
 
 async function runCommand(cwd: string, command: string, ...args: string[]): Promise<void> {
