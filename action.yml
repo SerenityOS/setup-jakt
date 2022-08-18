@@ -29,4 +29,6 @@ runs:
         llvm: 14.0.0
         cmake: true
         ninja: true
-  main: 'lib/jakt/main.js'
+    - uses: node16
+      with:
+        main: 'lib/jakt/main.js'
