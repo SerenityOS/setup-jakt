@@ -11,16 +11,17 @@ import glob from "glob";
 
 async function run() {
     let shouldCache = core.getBooleanInput("cache");
-    if (!shouldCache) {
-        core.setOutput("cache_hit", false);
-        return;
-    }
-
     let revision = core.getInput("revision");
     let token: string = core.getInput("token");
     const octokit = github.getOctokit(token);
 
     if (revision == "main") revision = await getLatestRevision(octokit);
+    core.setOutput("jakt-hash", revision);
+
+    if (!shouldCache) {
+        core.setOutput("cache_hit", false);
+        return;
+    }
 
     let trickSemverVersion = `0.0.0+${revision}`;
 

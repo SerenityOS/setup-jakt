@@ -25,11 +25,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/cache@v3
-      if: ${{ inputs.cache }}
-      with:
-        path: ${{ runner.tool_cache }}/jakt
-        key: jakt-${{ runner.os }}-${{ runner.arch }}
     - uses: actions/setup-node@v3
       with:
         node-version: 16
@@ -44,6 +39,12 @@ runs:
         INPUT_REVISION: ${{ inputs.revision }}
       shell: bash
       working-directory: ${{ github.action_path }}
+    - uses: actions/cache@v3
+      if: ${{ inputs.cache }}
+      with:
+        path: ${{ runner.tool_cache }}/jakt
+        key: jakt-${{ runner.os }}-${{ runner.arch }}-${{ steps.check_cache.outputs.jakt-hash }}
+        restore-keys: jakt-${{ runner.os }}-${{ runner.arch }}
     - uses: aminya/setup-cpp@v1
       with:
         llvm: 14.0.0
@@ -55,6 +56,6 @@ runs:
       env:
         INPUT_CACHE: ${{ inputs.cache }}
         INPUT_TOKEN: ${{ inputs.token }}
-        INPUT_REVISION: ${{ inputs.revision }}
+        INPUT_REVISION: ${{ steps.check_cache.outputs.jakt-hash }}
       shell: bash
       working-directory: ${{ github.action_path }}
