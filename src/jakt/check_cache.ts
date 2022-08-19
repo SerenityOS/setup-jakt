@@ -22,9 +22,11 @@ async function run() {
 
     if (revision == "main") revision = await getLatestRevision(octokit);
 
+    let trickSemverVersion = `0.0.0+${revision}`;
+
     let jaktPath: string;
     try {
-        jaktPath = tc.find("jakt", revision);
+        jaktPath = tc.find("jakt", trickSemverVersion);
         if (jaktPath == "") {
             let availableVersions = tc.findAllVersions("jakt");
             core.debug("Found cached versions: " + availableVersions);
@@ -42,11 +44,6 @@ async function run() {
         core.setOutput("cache_hit", false);
         return;
     }
-
-    core.startGroup(`Caching jakt#${revision}`);
-    let cachedPath = await tc.cacheDir(jaktPath, "jakt", revision);
-    core.info(`Cached jakt at ${cachedPath}`);
-    core.endGroup();
 
     core.addPath(path.join(jaktPath, "bin"));
     core.exportVariable("CMAKE_PREFIX_PATH", cmakePrefixPath(jaktPath));
