@@ -1,6 +1,9 @@
 name: 'Setup Jakt Environment'
 description: 'Setup a Jakt environment and add the compiler to the PATH'
 author: 'SerenityOS'
+branding:
+  icon: box
+  color: purple
 inputs:
   revision:
     description: 'The revision of Jakt to pull, defaults to latest on main'
