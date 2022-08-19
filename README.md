@@ -18,14 +18,14 @@ The produced Jakt installation can be cached for future reuse by passing in `cac
 Downloading and installing the latest available commit, without caching the built compiler binary:
 ```yaml
 steps:
-  - uses: alimpfard/setup-jakt@v1
+  - uses: SerenityOS/setup-jakt@v1
   - run: jakt -h
 ```
 
 Downloading and installing a specific commit, caching the built compiler binary:
 ```yaml
 steps:
-  - uses: alimpfard/setup-jakt@v1
+  - uses: SerenityOS/setup-jakt@v1
     with:
       cache: true
       revision: afcffe
