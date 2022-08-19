@@ -25,6 +25,11 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - uses: actions/cache@v3
+      if: ${{ inputs.cache }}
+      with:
+        path: ${{ runner.tool_cache }}/jakt
+        key: jakt-${{ runner.os }}-${{ runner.arch }}
     - uses: actions/setup-node@v3
       with:
         node-version: 16
@@ -46,6 +51,7 @@ runs:
         ninja: ${{ steps.check_cache.outputs.cache_hit != true }}
     - run: node lib/jakt/main.js
       if: ${{ steps.check_cache.outputs.cache_hit != true }}
+      id: build_jakt
       env:
         INPUT_CACHE: ${{ inputs.cache }}
         INPUT_TOKEN: ${{ inputs.token }}
