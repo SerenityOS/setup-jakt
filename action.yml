@@ -48,11 +48,13 @@ runs:
         path: ${{ runner.tool_cache }}/jakt
         key: jakt-${{ runner.os }}-${{ runner.arch }}-${{ steps.check_cache.outputs.jakt-hash }}
         restore-keys: jakt-${{ runner.os }}-${{ runner.arch }}
-    - uses: aminya/setup-cpp@v1
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
       with:
-        llvm: 14.0.0
-        cmake: ${{ steps.check_cache.outputs.cache_hit != true }}
-        ninja: ${{ steps.check_cache.outputs.cache_hit != true }}
+        # ninja version to download. Default: 1.10.0
+        version: 1.10.0
+    - run: ninja --version
+      shell: bash
     - run: node lib/jakt/main.js
       if: ${{ steps.check_cache.outputs.cache_hit != true }}
       id: build_jakt

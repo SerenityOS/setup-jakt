@@ -56,13 +56,15 @@ async function run() {
     }
 
     await runCommand(
-        buildPath,
+        process.env["GITHUB_WORKSPACE"],
         "cmake",
         "-DCMAKE_CXX_COMPILER=clang++",
         `-DCMAKE_INSTALL_PREFIX=${jaktPath}`,
         "-GNinja",
         "-S",
-        ".."
+        `${extractedPath}`,
+        "-B",
+        `${buildPath}`
     );
     await runCommand(buildPath, "cmake", "--build", ".");
     await runCommand(buildPath, "cmake", "--install", ".");
@@ -93,7 +95,7 @@ function cmakePrefixPath(jaktPath: string): string {
     return `${appendedPath}${separator}${existingPath}`;
 }
 
-async function runCommand(cwd: string, command: string, ...args: string[]): Promise<void> {
+async function runCommand(cwd: string | undefined, command: string, ...args: string[]): Promise<void> {
     return new Promise((res, rej) => {
         try {
             let process = child_process.spawn(command, args, {
